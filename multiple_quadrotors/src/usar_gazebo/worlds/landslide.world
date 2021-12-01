@@ -133,7 +133,19 @@
 	<uri>model://barrel</uri>
 	<pose>62.11 18.42 0.82 -1.32 0.71 -0.90</pose>
     </include>
-
+    
+   <include>
+      <name>radio_tower_124</name>
+      <pose>
+      14.0
+      -22.5
+      1.57965648
+      0
+      0
+      0
+      </pose>
+      <uri>model://radio_tower</uri>
+    </include>
 
   </world>
 </sdf>

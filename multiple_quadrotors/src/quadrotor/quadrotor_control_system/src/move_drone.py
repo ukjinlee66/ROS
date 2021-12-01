@@ -14,13 +14,18 @@ from trajectory_action_pkg.msg import ExecuteDroneApproachAction, ExecuteDroneAp
 if __name__=="__main__":
 
     rospy.init_node("move_drone", anonymous=True)
-    
+
     dest = ExecuteDroneApproachGoal()
     quad_name = sys.argv[1]                               # quadrotor name (UAV_1, UAV_2, ...)
     dest.goal.position.x = float(sys.argv[2])              # quadrotor X position
     dest.goal.position.y = float(sys.argv[3])              # quadrotor Y position
     dest.goal.position.z = float(sys.argv[4])              # quadrotor Z position
-
+    width = float(sys.argv[6])               # width
+    height = float(sys.argv[7])               # height
+    Pwid = float(sys.argv[8])                  #pattern width
+    print(width)
+    print(height)
+    print(Pwid)
     # Translate theta to quartenion
     theta = float(sys.argv[5])                             # quadrotor orientation
     q = quaternion_from_euler(0,0,theta,'ryxz')
@@ -28,6 +33,41 @@ if __name__=="__main__":
     dest.goal.orientation.y = q[1]
     dest.goal.orientation.z = q[2]
     dest.goal.orientation.w = q[3]
+
+    ######################################## zigzag pattern move ############################################################
+    trajectory_client = SimpleActionClient("{}/approach_server".format(quad_name), ExecuteDroneApproachAction)
+    trajectory_client.wait_for_server()
+    flag = False
+    for i in range(-16, int(height), int(Pwid)):
+        print('i : %d'%(i))
+        if flag == False: # ->
+            dest.goal.position.x = float(width)              # quadrotor X position 12 max
+            dest.goal.position.y = float(i)              # quadrotor Y position 12 max
+            dest.goal.position.z = float(sys.argv[4])
+            print("x : %f y : %f"%(dest.goal.position.x,dest.goal.position.y))
+            trajectory_client.send_goal(dest)                      # Send the goal
+            trajectory_client.wait_for_result()                    # Wait for the result
+            state = trajectory_client.get_state()                  # Get the state of the action
+            rospy.loginfo("Motion result: {}".format(state))
+            flag = True
+        else: # <-    
+            dest.goal.position.x = float(-5)              # quadrotor X position
+            dest.goal.position.y = float(i)              # quadrotor Y position 
+            dest.goal.position.z = float(sys.argv[4])
+            print("x : %f y : %f"%(dest.goal.position.x,dest.goal.position.y))
+            # trajectory_client = SimpleActionClient("{}/approach_server".format(quad_name), ExecuteDroneApproachAction)
+            # trajectory_client.wait_for_server()
+
+            trajectory_client.send_goal(dest)                      # Send the goal
+            trajectory_client.wait_for_result()                    # Wait for the result
+            state = trajectory_client.get_state()                  # Get the state of the action
+            rospy.loginfo("Motion result: {}".format(state))
+            flag = False
+        print('end')
+    dest.goal.position.x = float(sys.argv[2])              # quadrotor X position
+    dest.goal.position.y = float(sys.argv[3])              # quadrotor Y position
+    dest.goal.position.z = float(sys.argv[4])              # quadrotor Z position
+    ##########################################################################################################################
 
     trajectory_client = SimpleActionClient("{}/approach_server".format(quad_name), ExecuteDroneApproachAction)
     trajectory_client.wait_for_server()

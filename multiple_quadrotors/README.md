@@ -3,7 +3,7 @@ This is an implementation of multiple quadrotor capable of mapping the environme
 
 To run it first launch the system with:
 ```
-roslaunch full_system_launcher system.launch
+ro2slaunch full_system_launcher system.launch
 ```
 
 To set a position for any of the UAVs use:
